@@ -17,9 +17,13 @@ This repository contains a production-ready deployment of [Squid Proxy](http://w
 ## 🗂️ Directory Structure
 .
 ├── squid-config.yaml # ConfigMap with squid.conf
+
 ├── squid-deployment.yaml # Squid Deployment manifest
+
 ├── squid-service.yaml # Service manifest (ClusterIP or LoadBalancer)
+
 ├── squid-test-deployment.yaml # Test proxy working
+
 └── README.md # This file
 
 ---
