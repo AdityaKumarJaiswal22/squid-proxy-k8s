@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: proxy-test-app
+  namespace: squid
+  labels:
+    app: proxy-test-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: proxy-test-app
+  template:
+    metadata:
+      labels:
+        apps: proxy-test-app
+    spec:
+      containers:
+        - name: proxy-test-container
+          image: curlimages/curl:latest
+          command:
+            - "/bin/sh"
+            - "-c"
+            - "while true: do echo 'Testing proxy connectivity...'; curl -v https://httpbin.org/ip; sleep 30; done"
+          env:
+            - name: HTTP_PROXY
+              value: "http://squid-proxy-svc.squid.svc.cluster.local:3128"
+            - name: HTTPS_PROXY
+              value: "http://squid-proxy-svc.squid.svc.cluster.local:3128"
+            - name: FTP_PROXY
+              value: "http://squid-proxy-svc.squid.svc.cluster.local:3128"
+            - name: NO_PROXY
+              value: "localhost,127.0.0.1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,.svc,.cluster.local"
+          resources:
+            limits:
+              cpu: "100m"
+              memory: "128Mi"
+            requests:
+              cpu: "50m"
+              memory: "64Mi"

@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: squid-configmap
+  namespace: squid
+data:
+  squid: |
+    # Define SSL ports (for HTTPS traffic)
+    acl SSL_ports port 443
+
+    # Define safe ports (for HTTP and HTTPS traffic)
+    acl Safe_ports port 80          # HTTP
+    acl Safe_ports port 443         # HTTPS
+
+    # Allow HTTPS CONNECT method
+    acl CONNECT method CONNECT 
+
+    # Access Rules
+    http_access deny !Safe_ports               # Deny requests to unsafe ports
+    http_access deny CONNECT !SSL_ports        # Deny CONNECT method to non-SSL ports
+    http_access allow all                      # Allow all domains
+
+    # DNS Settings
+    dns_v4_first on    
+
+    # Proxy Port
+    http_port 3128    
+
+    # Logging
+    logformat timereadable %tl %6tr %>a %Ss/%03Hs %<st %rm %ru %un %Sh/%<A %mt
+    access_log daemon:/var/log/squid/access.log timereadable

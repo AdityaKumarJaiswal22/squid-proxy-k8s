@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: squid-proxy-server
+  namespace: squid
+  # annotations:
+  #   logging.googleapis.com/logs-paths: /var/log/squid/access.log
+spec:
+  selector:
+    matchLabels:
+      app: squid-proxy-server
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  template:
+    metadata:
+      labels:
+        app: squid-proxy-server
+    spec:
+      containers:
+        - name: squid
+          image: ubuntu/squid:edge
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: TZ
+              value: IST
+          ports:
+            - containerPort: 3128
+              name: squid
+              protocol: TCP
+          resources:
+            requests:
+              cpu: "800m"
+              memory: 1400Mi
+          volumeMounts:
+            - name: squid-config-volume
+              mountPath: /etc/squid/squid.conf
+              subPath: squid.conf
+      volumes:
+        - name: squid-config-volume
+          configMap:
+            name: squid-configmap
+            defaultMode: 420
+            items:
+              - key: squid
+                path: squid.conf
+      restartPolicy: Always
+      # nodeSelector:
+      #   cloud.google.com/gke-nodepool: api-server-nodepool
